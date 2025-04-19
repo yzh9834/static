@@ -1,0 +1,78 @@
+<html>
+<head>
+    <title>电力设施迁改报价系统</title>
+    <style>
+        .container {max-width: 800px; margin: 0 auto; padding: 20px;}
+        .section {border: 1px solid #ddd; padding: 15px; margin-bottom: 20px;}
+        .input-area {background: #f8f9fa; border: 2px dashed #ff4444;}
+        .output-area {border: 2px solid #ff4444; background: #fff;}
+        input {width: 100px; margin: 0 5px; text-align: center;}
+        .red-border {border: 2px solid #ff4444 !important;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section input-area red-border">
+            <h3>输入参数</h3>
+            <table id="inputTable"></table>
+        </div>
+
+        <div class="section output-area red-border">
+            <h3>计算结果</h3>
+            <table id="resultTable"></table>
+            <div>总建设投资：<span id="totalInvestment">0</span>万元</div>
+        </div>
+    </div>
+
+    <script>
+        // 修复1: 数组定义使用方括号
+        const projectData = [
+            {name: "电力电缆", unit: "米", count: 360, price: 1300},
+            {name: "电缆终端头", unit: "套", count: 1, price: 1600},
+            {name: "电缆试验", unit: "项", count: 1, price: 20000}
+        ];
+
+        function initTable() {
+            const inputTable = document.getElementById('inputTable');
+            projectData.forEach((item, index) => {
+                const row = inputTable.insertRow();
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.unit}</td>
+                    <td><input type="number" data-index="${index}" class="count-input" value="${item.count}"></td>
+                    <td><input type="number" data-index="${index}" class="price-input" value="${item.price}"></td>
+                    <td class="total">0</td>
+                    <td class="ratio">0%</td>
+                `;
+            });
+        }
+
+        function calculate() {
+            let totalInvestment = 0;
+            
+            projectData.forEach((item, index) => {
+                // 修复2: 正确的属性选择器写法
+                const countInput = document.querySelector(`[data-index="${index}"].count-input`);
+                const priceInput = document.querySelector(`[data-index="${index}"].price-input`);
+                
+                const count = parseFloat(countInput.value) || 0;
+                const price = parseFloat(priceInput.value) || 0;
+                const total = count * price;
+
+                // 更新对应单元格
+                const row = countInput.closest('tr');
+                row.querySelector('.total').textContent = total.toFixed(2);
+                // 假设146是基准值，按需修改
+                row.querySelector('.ratio').textContent = ((total / 146 * 100).toFixed(2)) + '%';
+                
+                totalInvestment += total;
+            });
+
+            document.getElementById('totalInvestment').textContent = (totalInvestment / 10000).toFixed(2); // 转换为万元
+        }
+
+        document.addEventListener('input', calculate);
+        initTable();
+    </script>
+</body>
+</html>
